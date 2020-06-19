@@ -4,9 +4,9 @@
   "description": "a simple phaserio + socketio game",
   "main": "server.js",
   "scripts": {
-    "test": "nodemon server.js -e js,html,css",
-    "start": "pm2 start server.js && pm2 logs",
-    "stop": "pm2 stop server.js"
+    "test": "nodemon src/server.js -e js,html,css",
+    "start": "pm2 start src/server.js && pm2 logs",
+    "stop": "pm2 stop src/server.js"
   },
   "main":"server.js",
   "author": "Jagath Jai Kumar",

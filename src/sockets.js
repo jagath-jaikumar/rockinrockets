@@ -4,6 +4,11 @@ exports = module.exports = function(io){
 
     console.log(socket.id);
 
+    socket.on('getPlanets', function() {
+        socket.emit('planets', game.planets);
+    });
+
+
     game.players[socket.id] = {
       x: Math.floor(Math.random() * 1000) + 200,
       y: Math.floor(Math.random() * 1000) + 200,
@@ -14,7 +19,6 @@ exports = module.exports = function(io){
 
     socket.emit('currentPlayers', game.players);
     socket.broadcast.emit('newPlayer', game.players[socket.id]);
-
 
     socket.on('disconnect', function(){
       console.log('user disconnectd: ' + socket.id);

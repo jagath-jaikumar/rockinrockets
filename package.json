@@ -8,7 +8,7 @@
     "start": "pm2 start src/server.js && pm2 logs",
     "stop": "pm2 stop src/server.js"
   },
-  "main":"server.js",
+  "main":"src/server.js",
   "author": "Jagath Jai Kumar",
   "license": "MIT",
   "dependencies": {

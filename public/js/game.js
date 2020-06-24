@@ -4,7 +4,10 @@ var config = {
     height: 560,
     parent: 'my-phaser-game',
     physics: {
-        default: 'arcade',
+      default: 'arcade',
+      arcade: {
+          debug: true,
+      }
     },
     scale: {
         mode: Phaser.Scale.RESIZE,
@@ -22,9 +25,16 @@ var game = new Phaser.Game(config);
 
 function preload ()
 {
-  this.load.spritesheet('rockets', 'assets/sprites/rocketv2.png', { frameWidth: 32, frameHeight: 48 });
+  this.load.spritesheet('rockets', 'assets/sprites/rocketv3.png', { frameWidth: 64, frameHeight: 64 });
   this.load.image('bg','assets/tiles/background-sky.png');
+  this.load.image('planet','assets/sprites/planet.png');
+
+  this.load.audio('flightsong', 'assets/music/flightsong.wav');
 }
+
+// function playerCollide(){
+//   console.log('player collided');
+// }
 
 function addPlayer(self, playerInfo, type) {
   if (type === "player"){
@@ -33,7 +43,19 @@ function addPlayer(self, playerInfo, type) {
   } else {
     const otherPlayer = self.add.sprite(playerInfo.x, playerInfo.y, 'rockets', 0);
     otherPlayer.playerId = playerInfo.playerId;
+
+    // self.physics.add.overlap(otherPlayer, self.player, playerCollide);
     self.otherPlayers.add(otherPlayer);
+  }
+}
+function planetCollide() {
+  console.log('planet collided');
+}
+function addPlanet(self, planetInfo){
+  for (var p in planetInfo){
+    var planet = self.physics.add.image(planetInfo[p].x, planetInfo[p].y, 'planet').setImmovable(false);
+    self.physics.add.overlap(self.player, planet, planetCollide);
+    self.planets.add(planet);
   }
 }
 
@@ -42,6 +64,8 @@ function create ()
     var self = this;
     this.socket = io();
     this.otherPlayers = this.physics.add.group();
+    this.planets = this.physics.add.group();
+
     this.cameras.main.setBounds(0, 0, 1920 * 2, 1080 * 2);
     this.physics.world.setBounds(0, 0, 1920 * 2, 1080 * 2);
     this.add.image(0, 0, 'bg').setOrigin(0);
@@ -49,7 +73,20 @@ function create ()
     this.add.image(0, 1080, 'bg').setOrigin(0).setFlipY(true);
     this.add.image(1920, 1080, 'bg').setOrigin(0).setFlipX(true).setFlipY(true);
 
+    music = this.sound.addf('flightsong');
+
+    music.play();
+
+
     cursors = this.input.keyboard.createCursorKeys();
+
+
+    this.socket.emit('getPlanets');
+
+    this.socket.on('planets', function(planet_data) {
+      addPlanet(self, planet_data);
+
+    });
 
 
     this.socket.on('currentPlayers', function (players) {
@@ -67,6 +104,14 @@ function create ()
     this.socket.on('newPlayer', function (playerInfo) {
       addPlayer(self, playerInfo, "other");
     });
+
+
+    this.socket.on('newPlanet', function (planetInfo) {
+      console.log('added');
+      addPlanet(self, planetInfo);
+
+    });
+
     this.socket.on('disconnect', function (playerId) {
       self.otherPlayers.getChildren().forEach(function (otherPlayer) {
         if (playerId === otherPlayer.playerId) {
@@ -93,7 +138,7 @@ function create ()
 
     this.anims.create({
         key: 'fly',
-        frames: this.anims.generateFrameNumbers('rockets', { start: 1, end: 5 }),
+        frames: this.anims.generateFrameNumbers('rockets', { start: 1, end: 10 }),
         frameRate: 8,
         repeat: -1
     });
@@ -106,6 +151,10 @@ function create ()
     });
 }
 
+function test()
+{
+  console.log('collide');
+}
 function update ()
 {
   if (this.player){
